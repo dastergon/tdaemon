@@ -16,7 +16,7 @@ import os
 import argparse
 from time import sleep
 import hashlib
-import subprocess
+import commands
 import datetime
 import re
 
@@ -204,9 +204,20 @@ class Watcher(object):
     def run(self, cmd):
         """Runs the appropriate command"""
         print datetime.datetime.now()
-        output = subprocess.Popen(cmd, shell=True)
-        output = output.communicate()[0]
+        output = commands.getoutput(cmd)
+        content = ''
+        status = ''
+        result = ''
+        for line in output.splitlines(True):
+            if line.startswith('Ran'):
+                result = line
+            elif line.startswith('OK') or line.startswith('FAIL'):
+                status = line
+            content = '%s\n%s' % (status, result)
+        title = 'tdaemon results'
         print output
+        CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
+        os.system(CURRENT_PATH + '/notify.sh "{0}" "{1}" '.format(title, content))
 
     def run_tests(self):
         """Execute tests"""
