@@ -221,10 +221,13 @@ class Watcher(object):
 
     def run_tests(self):
         """Execute tests"""
-        self.run(self.cmd)
+        if self.counter == 0:
+            self.run(self.cmd)
+        self.counter = self.counter + 1
 
     def loop(self):
         """Main loop daemon."""
+        self.counter = 0
         while True:
             sleep(1)
             new_file_list = self.walk(self.file_path, {})
@@ -233,6 +236,8 @@ class Watcher(object):
                     self.diff_list(new_file_list, self.file_list)
                 self.run_tests()
                 self.file_list = new_file_list
+                if self.counter == 3:
+                    self.counter = 0
 
 def main(prog_args=None):
     """
