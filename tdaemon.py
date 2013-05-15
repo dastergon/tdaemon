@@ -209,7 +209,7 @@ class Watcher(object):
 
     def run(self, cmd):
         """Runs the appropriate command"""
-        pynotify.init("Basic")
+        pynotify.init("image")
         print datetime.datetime.now()
         output = commands.getoutput(cmd)
         content = ''
@@ -221,9 +221,9 @@ class Watcher(object):
             elif line.startswith('OK') or line.startswith('FAIL'):
                 status = line
                 if status.startswith('OK'):
-                    image = "img/button_green.png"
+                    image = os.path.realpath(os.path.dirname(sys.argv[0])) + "img/button_green.png"
                 else:
-                    image = "img/button_red.png"
+                    image = os.path.realpath(os.path.dirname(sys.argv[0])) + "img/button_red.png"
             content = '%s\n%s' % (status, result)
         title = 'tdaemon results'
         print output
