@@ -220,10 +220,14 @@ class Watcher(object):
                 result = line
             elif line.startswith('OK') or line.startswith('FAIL'):
                 status = line
+                if status.startswith('OK'):
+                    image = "img/button_green.png"
+                else:
+                    image = "img/button_red.png"
             content = '%s\n%s' % (status, result)
         title = 'tdaemon results'
         print output
-        n = pynotify.Notification(title, content)
+        n = pynotify.Notification(title, content, image)
         n.show()
 
     def run_tests(self):
