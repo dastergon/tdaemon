@@ -19,7 +19,11 @@ import hashlib
 import commands
 import datetime
 import re
-import pynotify
+try:
+    import pynotify
+except ImportError:
+    print "pynotify not in your systerm, please : emerge -av dev-python/notify-python"
+    sys.exit(1)
 
 SPECIAL_CHARS_REGEX_PATTERN = r'[#&;`|*?~<>^()\[\]{}$\\]+'
 IGNORE_EXTENSIONS = ('pyc', 'pyo')
