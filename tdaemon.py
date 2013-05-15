@@ -221,9 +221,10 @@ class Watcher(object):
             elif line.startswith('OK') or line.startswith('FAIL'):
                 status = line
                 if status.startswith('OK'):
-                    image = os.path.realpath(os.path.dirname(sys.argv[0])) + "img/button_green.png"
+                    image = os.path.realpath(os.path.dirname(sys.argv[0])) + "/img/button_green.png"
+                    print image
                 else:
-                    image = os.path.realpath(os.path.dirname(sys.argv[0])) + "img/button_red.png"
+                    image = os.path.realpath(os.path.dirname(sys.argv[0])) + "/img/button_red.png"
             content = '%s\n%s' % (status, result)
         title = 'tdaemon results'
         print output
