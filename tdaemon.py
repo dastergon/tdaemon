@@ -19,6 +19,7 @@ import hashlib
 import commands
 import datetime
 import re
+import pynotify
 
 SPECIAL_CHARS_REGEX_PATTERN = r'[#&;`|*?~<>^()\[\]{}$\\]+'
 IGNORE_EXTENSIONS = ('pyc', 'pyo')
@@ -203,6 +204,7 @@ class Watcher(object):
 
     def run(self, cmd):
         """Runs the appropriate command"""
+        pynotify.init("Basic")
         print datetime.datetime.now()
         output = commands.getoutput(cmd)
         content = ''
@@ -216,8 +218,8 @@ class Watcher(object):
             content = '%s\n%s' % (status, result)
         title = 'tdaemon results'
         print output
-        CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
-        os.system(CURRENT_PATH + '/notify.sh "{0}" "{1}" '.format(title, content))
+        n = pynotify.Notification(title, content)
+        n.show()
 
     def run_tests(self):
         """Execute tests"""
