@@ -10,13 +10,13 @@ The present code is published under the terms of the MIT License. See LICENSE
 file for more details.
 """
 
-
 import sys
 import os
 import argparse
 from time import sleep
 import hashlib
 import commands
+import subprocess
 import datetime
 import re
 try:
@@ -29,23 +29,25 @@ SPECIAL_CHARS_REGEX_PATTERN = r'[#&;`|*?~<>^()\[\]{}$\\]+'
 IGNORE_EXTENSIONS = ('pyc', 'pyo')
 IGNORE_DIRS = ('.bzr', '.git', '.hg', '.darcs', '.svn', '.tox')
 IMPLEMENTED_TEST_PROGRAMS = ('nose', 'nosetests', 'django', 'py', 'symfony',
-    'jelix', 'phpunit', 'sphinx',
-)
+                             'jelix', 'phpunit', 'sphinx',
+                             )
 
-# -------- Exceptions
+
 class InvalidTestProgram(Exception):
     """Raised as soon as an unexpected test program is chosen"""
     pass
+
 
 class InvalidFilePath(Exception):
     """Raised if the path to project/module is unknown/missing."""
     pass
 
+
 class CancelDueToUserRequest(Exception):
     """Raised when user wants to cancel execution"""
     pass
 
-# -------- Utils
+
 def ask(message='Are you sure? [y/N]'):
     """Asks the user his opinion."""
     agree = False
@@ -54,10 +56,12 @@ def ask(message='Are you sure? [y/N]'):
         agree = True
     return agree
 
+
 def escapearg(args):
     """Escapes characters you don't want in arguments (preventing shell
     injection)"""
     return re.sub(SPECIAL_CHARS_REGEX_PATTERN, '', args)
+
 
 class Watcher(object):
     """
@@ -68,7 +72,7 @@ class Watcher(object):
     debug = False
 
     def __init__(self, file_path, test_program, debug=False, custom_args='',
-        ignore_dirs=None):
+                 ignore_dirs=None):
         # Safe filter
         custom_args = escapearg(custom_args)
 
@@ -87,14 +91,13 @@ class Watcher(object):
         self.debug = debug
         self.cmd = self.get_cmd()
 
-
     def check_configuration(self, file_path, test_program, custom_args):
         """Checks if configuration is ok."""
         # checking filepath
         if not os.path.isdir(file_path):
             raise InvalidFilePath("INVALID CONFIGURATION: file path %s is not a directory" %
-                os.path.abspath(file_path)
-            )
+                                  os.path.abspath(file_path)
+                                  )
 
         if not test_program in IMPLEMENTED_TEST_PROGRAMS:
             raise InvalidTestProgram('The `%s` is unknown, or not yet implemented. Please chose another one.' % test_program)
@@ -122,10 +125,9 @@ class Watcher(object):
                 sys.exit('django is not available on your system. Please install it and try to run it again')
         if self.test_program == 'phpunit':
             try:
-                process = subprocess.check_call(['phpunit','--version'])
+                process = subprocess.check_call(['phpunit', '--version'])
             except:
                 sys.exit('phpunit is not available on your system. Please install it and try to run it again')
-
 
     def get_cmd(self):
         """Returns the full command to be executed at runtime"""
@@ -197,7 +199,6 @@ class Watcher(object):
         size = sum(map(os.path.getsize, self.file_list))
         return size / 1024 / 1024
 
-
     def diff_list(self, list1, list2):
         """Extracts differences between lists. For debug purposes"""
         for key in list1:
@@ -245,6 +246,7 @@ class Watcher(object):
                 if self.counter == 3:
                     self.counter = 0
 
+
 def main(prog_args=None):
     """
     What do you expect?
@@ -255,17 +257,17 @@ def main(prog_args=None):
     parser = argparse.ArgumentParser(description="Test Daemon in Python")
     parser.add_argument('dir', nargs='?', default=os.getcwd())
     parser.add_argument("-t", "--test-program", dest="test_program",
-        default="nose", help="specifies the test-program to use. Valid values"
-        " include `nose` (or `nosetests`), `django`, `py` (for `py.test`), "
-        '`symfony`, `jelix` and `phpunit`')
+                        default="nose", help="specifies the test-program to use. Valid values"
+                        " include `nose` (or `nosetests`), `django`, `py` (for `py.test`), "
+                        '`symfony`, `jelix` and `phpunit`')
     parser.add_argument("-d", "--debug", dest="debug", action="store_true",
-        default=False)
+                        default=False)
     parser.add_argument('-s', '--size-max', dest='size_max', default=25,
-        type=int, help="Sets the maximum size (in MB) of files.")
+                        type=int, help="Sets the maximum size (in MB) of files.")
     parser.add_argument('--custom-args', dest='custom_args', default='',
-        help="Defines custom arguments to pass after the test program command")
+                        help="Defines custom arguments to pass after the test program command")
     parser.add_argument('--ignore-dirs', dest='ignore_dirs', default='',
-        help="Defines directories to ignore.  Use a comma-separated list.")
+                        help="Defines directories to ignore.  Use a comma-separated list.")
 
     args = parser.parse_args()
 
@@ -275,11 +277,12 @@ def main(prog_args=None):
         path = '.'
 
     try:
-        watcher = Watcher(path, args.test_program, args.debug, args.custom_args,
+        watcher = Watcher(
+            path, args.test_program, args.debug, args.custom_args,
             args.ignore_dirs)
         watcher_file_size = watcher.file_sizes()
         if watcher_file_size > args.size_max:
-            message =  "It looks like the total file size (%dMb) is larger  than the `max size` option (%dMb).\nThis may slow down the file comparison process, and thus the daemon performances.\nDo you wish to continue? [y/N] " % (watcher_file_size, opt.size_max)
+            message = "It looks like the total file size (%dMb) is larger  than the `max size` option (%dMb).\nThis may slow down the file comparison process, and thus the daemon performances.\nDo you wish to continue? [y/N] " % (watcher_file_size, args.size_max)
 
             if not ask(message):
                 raise CancelDueToUserRequest('Ok, thx, bye...')
@@ -296,4 +299,3 @@ def main(prog_args=None):
 
 if __name__ == '__main__':
     main()
-

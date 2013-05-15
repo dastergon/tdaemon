@@ -3,6 +3,7 @@
 import tdaemon
 import unittest
 
+
 class Test(unittest.TestCase):
 
     def test_remove_special_chars(self):
